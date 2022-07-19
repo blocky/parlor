@@ -6,5 +6,8 @@ GOTIDY=$(GOMOD) tidy
 
 default: test
 
-test:
+test: mock
 	@$(GOTEST) -v ./... && $(GOTIDY)
+
+mock:
+	cd internal && mockery --all
