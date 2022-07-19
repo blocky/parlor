@@ -6,6 +6,10 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+type Parlor struct {
+	suite.Suite
+}
+
 type TestingParlor interface {
 	suite.TestingSuite
 	suite.SetupTestSuite
@@ -16,18 +20,32 @@ func Run(t *testing.T, parlor TestingParlor) {
 	suite.Run(t, parlor)
 }
 
-func RunSubtest(
-	parlor TestingParlor,
+func (p *Parlor) Run(
 	name string,
 	subtest func(),
+	tp TestingParlor,
 ) bool {
-	oldT := parlor.T()
-	defer parlor.SetT(oldT)
+	return p.RunWithSetupAndTeardown(
+		name,
+		subtest,
+		tp.SetupTest,
+		tp.TearDownTest,
+	)
+}
+
+func (p *Parlor) RunWithSetupAndTeardown(
+	name string,
+	subtest func(),
+	setup func(),
+	teardown func(),
+) bool {
+	oldT := p.T()
+	defer p.SetT(oldT)
 
 	return oldT.Run(name, func(t *testing.T) {
-		parlor.SetT(t)
-		parlor.SetupTest()
-		defer parlor.TearDownTest()
+		p.SetT(t)
+		setup()
+		defer teardown()
 		subtest()
 	})
 }

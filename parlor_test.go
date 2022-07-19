@@ -1,14 +1,14 @@
 package parlor_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/blocky/parlor"
-	"github.com/stretchr/testify/suite"
 )
 
 type ParlorTestSuite struct {
-	suite.Suite
+	parlor.Parlor
 
 	str string
 }
@@ -18,23 +18,25 @@ func TestParlorTestSuite(t *testing.T) {
 }
 
 func (p *ParlorTestSuite) SetupTest() {
+	fmt.Println("setuptest")
 	p.str = "setup"
 }
 
 func (p *ParlorTestSuite) TearDownTest() {
+	fmt.Println("teardowntest")
 	p.str = "teardown"
 }
 
 func (p *ParlorTestSuite) TestParlor() {
 	p.Equal("setup", p.str)
 
-	parlor.RunSubtest(p, "subtest 1", func() {
+	p.Run("subtest 1", func() {
 		p.Equal("setup", p.str)
-	})
+	}, p)
 	p.Equal("teardown", p.str)
 
-	parlor.RunSubtest(p, "subtest 2", func() {
+	p.Run("subtest 2", func() {
 		p.Equal("setup", p.str)
-	})
+	}, p)
 	p.Equal("teardown", p.str)
 }
