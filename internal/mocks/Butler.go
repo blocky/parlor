@@ -9,12 +9,12 @@ type Butler struct {
 	mock.Mock
 }
 
-// SetupTestCalled provides a mock function with given fields:
-func (_m *Butler) SetupTestCalled() {
+// SetupTest provides a mock function with given fields:
+func (_m *Butler) SetupTest() {
 	_m.Called()
 }
 
-// TearDownTestCalled provides a mock function with given fields:
-func (_m *Butler) TearDownTestCalled() {
+// TearDownTest provides a mock function with given fields:
+func (_m *Butler) TearDownTest() {
 	_m.Called()
 }

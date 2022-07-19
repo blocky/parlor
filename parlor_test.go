@@ -1,42 +1,50 @@
 package parlor_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/blocky/parlor"
+	"github.com/blocky/parlor/internal/mocks"
 )
 
 type ParlorTestSuite struct {
 	parlor.Parlor
-
-	str string
+	butler *mocks.Butler
 }
 
 func TestParlorTestSuite(t *testing.T) {
 	parlor.Run(t, new(ParlorTestSuite))
 }
 
+func (p *ParlorTestSuite) SetupSuite() {
+	p.butler = new(mocks.Butler)
+	p.butler.On("SetupTest").Return().Once()
+}
+
+func (p *ParlorTestSuite) TearDownSuite() {
+	p.butler.AssertExpectations(p.T())
+}
+
 func (p *ParlorTestSuite) SetupTest() {
-	fmt.Println("setuptest")
-	p.str = "setup"
+	p.butler.SetupTest()
 }
 
 func (p *ParlorTestSuite) TearDownTest() {
-	fmt.Println("teardowntest")
-	p.str = "teardown"
+	p.butler.TearDownTest()
 }
 
 func (p *ParlorTestSuite) TestParlor() {
-	p.Equal("setup", p.str)
+	p.butler.On("SetupTest").Return().Once()
 
 	p.Run("subtest 1", func() {
-		p.Equal("setup", p.str)
+		p.butler.On("TearDownTest").Return().Once()
 	}, p)
-	p.Equal("teardown", p.str)
+
+	p.butler.On("SetupTest").Return().Once()
 
 	p.Run("subtest 2", func() {
-		p.Equal("setup", p.str)
+		p.butler.On("TearDownTest").Return().Once()
 	}, p)
-	p.Equal("teardown", p.str)
+
+	p.butler.On("TearDownTest").Return().Once()
 }
