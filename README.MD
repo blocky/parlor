@@ -1,3 +1,7 @@
+[![GoDoc](https://godoc.org/github.com/blocky/parlor?status.svg)](https://godoc.org/github.com/blocky/parlor)
+[![Build Status](https://app.travis-ci.com/blocky/parlor.svg?token=JczzdP6eMqmEqysZ8pDf&branch=main)](https://app.travis-ci.com/blocky/parlor)
+[![Go Report Card](https://goreportcard.com/badge/github.com/blocky/parlor)](https://goreportcard.com/report/github.com/blocky/parlor)
+
 # Parlor - a Testify Suite wrapper
 Parlor is a simple wrapper for the Testify Suite by Stretchr
 https://github.com/stretchr/testify
