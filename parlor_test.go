@@ -63,7 +63,7 @@ func TestParlorWithTearDown(t *testing.T) {
 	p.tearDown.Assert(t, 0, 2)
 }
 
-// this test just makes sure everything compiles if we don't have a setup for a
+// this test just makes sure everything compiles if we don't have a setup or a
 // teardown for a subtest but are using parlor
 type NoSetupOrTearDown struct {
 	parlor.Parlor
@@ -79,7 +79,7 @@ func TestParlorNoSetupOrTeardown(t *testing.T) {
 }
 
 // this is the real test, we will make sure to count every setup and teardown
-// call and as we move throught the lifecycly, we make sure that all calls are
+// call and as we move throught the lifecycle, we make sure that all calls are
 // happening as expected.
 type ParlorTestCallCounts struct {
 	parlor.Parlor
