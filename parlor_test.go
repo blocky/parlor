@@ -3,69 +3,148 @@ package parlor_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/blocky/parlor"
 )
 
-type ParlorYesSetupNoTearDown struct {
+type CallCounter struct {
+	Test    int
+	Subtest int
+}
+
+func (c CallCounter) Assert(t *testing.T, test, subtest int) {
+	assert.Equal(t, test, c.Test)
+	assert.Equal(t, subtest, c.Subtest)
+
+}
+
+// this test makes sure everything compiles and total call cound it correct
+// if we just have a setup
+type WithSetup struct {
 	parlor.Parlor
-	setupCallCount int
+	setup CallCounter
 }
 
-func TestParlorYesSetupNoTearDown(t *testing.T) {
-	parlor.Run(t, new(ParlorYesSetupNoTearDown))
+func (p *WithSetup) SetupSubtest() {
+	p.setup.Subtest += 1
 }
 
-func (p *ParlorYesSetupNoTearDown) SetupSuite() {
-	p.setupCallCount = 0
+func (p *WithSetup) TestParlor() {
+	p.Run("subtest 1", func() {})
+	p.Run("subtest 2", func() {})
 }
 
-func (p *ParlorYesSetupNoTearDown) SetupTest() {
-	p.setupCallCount += 1
+func TestParlorWithSetup(t *testing.T) {
+	p := new(WithSetup)
+	parlor.Run(t, p)
+	p.setup.Assert(t, 0, 2)
 }
 
-func (p *ParlorYesSetupNoTearDown) TestParlor() {
-	p.Equal(1, p.setupCallCount, "should be called once before the test")
+// this test makes sure everything compiles and total call cound it correct
+// if we just have a teardown
+type WithTearDown struct {
+	parlor.Parlor
+	tearDown CallCounter
+}
+
+func (p *WithTearDown) TearDownSubtest() {
+	p.tearDown.Subtest += 1
+}
+
+func (p *WithTearDown) TestParlor() {
+	p.Run("subtest 1", func() {})
+	p.Run("subtest 2", func() {})
+}
+
+func TestParlorWithTearDown(t *testing.T) {
+	p := new(WithTearDown)
+	parlor.Run(t, p)
+	p.tearDown.Assert(t, 0, 2)
+}
+
+// this test just makes sure everything compiles if we don't have a setup for a
+// teardown for a subtest but are using parlor
+type NoSetupOrTearDown struct {
+	parlor.Parlor
+}
+
+func (p *NoSetupOrTearDown) TestParlor() {
+	p.Run("subtest 1", func() {})
+	p.Run("subtest 2", func() {})
+}
+
+func TestParlorNoSetupOrTeardown(t *testing.T) {
+	parlor.Run(t, new(NoSetupOrTearDown))
+}
+
+// this is the real test, we will make sure to count every setup and teardown
+// call and as we move throught the lifecycly, we make sure that all calls are
+// happening as expected.
+type ParlorTestCallCounts struct {
+	parlor.Parlor
+	setup    CallCounter
+	tearDown CallCounter
+}
+
+func (p *ParlorTestCallCounts) AssertSetup(test, subtest int) {
+	p.setup.Assert(p.T(), test, subtest)
+}
+
+func (p *ParlorTestCallCounts) AssertTeardown(test, subtest int) {
+	p.tearDown.Assert(p.T(), test, subtest)
+}
+
+func (p *ParlorTestCallCounts) SetupTest() {
+	p.setup.Test += 1
+}
+
+func (p *ParlorTestCallCounts) SetupSubtest() {
+	p.setup.Subtest += 1
+}
+
+func (p *ParlorTestCallCounts) TearDownTest() {
+	p.tearDown.Test += 1
+}
+
+func (p *ParlorTestCallCounts) TearDownSubtest() {
+	p.tearDown.Subtest += 1
+}
+
+func (p *ParlorTestCallCounts) SetupSuite() {
+	p.AssertSetup(0, 0)
+	p.AssertTeardown(0, 0)
+}
+
+func (p *ParlorTestCallCounts) TearDownSuite() {
+	p.AssertSetup(1, 2)
+	p.AssertTeardown(1, 2)
+}
+
+func (p *ParlorTestCallCounts) TestParlor() {
+	p.AssertSetup(1, 0)
+	p.AssertTeardown(0, 0)
 
 	p.Run("subtest 1", func() {
-		p.Equal(2, p.setupCallCount, "should be called again before subtest 1")
+		p.AssertSetup(1, 1)
+		p.AssertTeardown(0, 0)
 	})
+
+	p.AssertSetup(1, 1)
+	p.AssertTeardown(0, 1)
 
 	p.Run("subtest 2", func() {
-		p.Equal(3, p.setupCallCount, "should be called again before subtest 2")
+		p.AssertSetup(1, 2)
+		p.AssertTeardown(0, 1)
 	})
+
+	p.AssertSetup(1, 2)
+	p.AssertTeardown(0, 2)
 }
 
-func (p *ParlorYesSetupNoTearDown) TearDownSuite() {
-	p.Equal(3, p.setupCallCount, "should not be called again")
-}
-
-type ParlorNoSetupYesTearDown struct {
-	parlor.Parlor
-	tearDownCallCount int
-}
-
-func TestParlorNoSetupYesTearDown(t *testing.T) {
-	parlor.Run(t, new(ParlorNoSetupYesTearDown))
-}
-
-func (p *ParlorNoSetupYesTearDown) SetupSuite() {
-	p.tearDownCallCount = 0
-}
-
-func (p *ParlorNoSetupYesTearDown) TearDownTest() {
-	p.tearDownCallCount += 1
-}
-
-func (p *ParlorNoSetupYesTearDown) TestParlor() {
-	p.Equal(0, p.tearDownCallCount, "tear down not yet called")
-
-	p.Run("subtest 1", func() {})
-	p.Equal(1, p.tearDownCallCount, "should be called after subtest 1")
-
-	p.Run("subtest 2", func() {})
-	p.Equal(2, p.tearDownCallCount, "should be called after subtest 2")
-}
-
-func (p *ParlorNoSetupYesTearDown) TearDownSuite() {
-	p.Equal(3, p.tearDownCallCount, "one more time after test parlor completes")
+func TestParlorCallCounts(t *testing.T) {
+	p := new(ParlorTestCallCounts)
+	parlor.Run(t, p)
+	p.AssertSetup(1, 2)
+	p.AssertTeardown(1, 2)
 }

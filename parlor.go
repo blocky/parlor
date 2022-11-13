@@ -6,6 +6,19 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+type SetupSubtestSuite interface {
+	SetupSubtest()
+}
+
+type TearDownSubtestSuite interface {
+	TearDownSubtest()
+}
+
+type TestingParlor interface {
+	suite.TestingSuite
+	SetTestingParlor(TestingParlor)
+}
+
 type Parlor struct {
 	suite.Suite
 	testingParlor interface{}
@@ -15,11 +28,6 @@ func (p *Parlor) SetTestingParlor(tp TestingParlor) {
 	p.testingParlor = tp
 }
 
-type TestingParlor interface {
-	suite.TestingSuite
-	SetTestingParlor(TestingParlor)
-}
-
 func Run(t *testing.T, parlor TestingParlor) {
 	parlor.SetTestingParlor(parlor)
 	suite.Run(t, parlor)
@@ -27,13 +35,13 @@ func Run(t *testing.T, parlor TestingParlor) {
 
 func (p *Parlor) Run(name string, subtest func()) bool {
 	setup := func() {}
-	if i, ok := p.testingParlor.(suite.SetupTestSuite); ok {
-		setup = i.SetupTest
+	if i, ok := p.testingParlor.(SetupSubtestSuite); ok {
+		setup = i.SetupSubtest
 	}
 
 	teardown := func() {}
-	if i, ok := p.testingParlor.(suite.TearDownTestSuite); ok {
-		teardown = i.TearDownTest
+	if i, ok := p.testingParlor.(TearDownSubtestSuite); ok {
+		teardown = i.TearDownSubtest
 	}
 
 	oldT := p.T()
