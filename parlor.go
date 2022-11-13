@@ -21,7 +21,7 @@ type TestingParlor interface {
 
 type Parlor struct {
 	suite.Suite
-	testingParlor interface{}
+	testingParlor TestingParlor
 }
 
 func (p *Parlor) SetTestingParlor(tp TestingParlor) {
