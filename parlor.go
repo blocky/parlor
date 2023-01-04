@@ -6,39 +6,44 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type Parlor struct {
-	suite.Suite
+type SetupSubtestSuite interface {
+	SetupSubtest()
+}
+
+type TearDownSubtestSuite interface {
+	TearDownSubtest()
 }
 
 type TestingParlor interface {
 	suite.TestingSuite
-	suite.SetupTestSuite
-	suite.TearDownTestSuite
+	SetTestingParlor(TestingParlor)
+}
+
+type Parlor struct {
+	suite.Suite
+	testingParlor TestingParlor
+}
+
+func (p *Parlor) SetTestingParlor(tp TestingParlor) {
+	p.testingParlor = tp
 }
 
 func Run(t *testing.T, parlor TestingParlor) {
+	parlor.SetTestingParlor(parlor)
 	suite.Run(t, parlor)
 }
 
-func (p *Parlor) Run(
-	name string,
-	subtest func(),
-	tp TestingParlor,
-) bool {
-	return p.RunWithSetupAndTeardown(
-		name,
-		subtest,
-		tp.SetupTest,
-		tp.TearDownTest,
-	)
-}
+func (p *Parlor) Run(name string, subtest func()) bool {
+	setup := func() {}
+	if i, ok := p.testingParlor.(SetupSubtestSuite); ok {
+		setup = i.SetupSubtest
+	}
 
-func (p *Parlor) RunWithSetupAndTeardown(
-	name string,
-	subtest func(),
-	setup func(),
-	teardown func(),
-) bool {
+	teardown := func() {}
+	if i, ok := p.testingParlor.(TearDownSubtestSuite); ok {
+		teardown = i.TearDownSubtest
+	}
+
 	oldT := p.T()
 	defer p.SetT(oldT)
 
