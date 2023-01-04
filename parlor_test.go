@@ -19,7 +19,7 @@ func (c CallCounter) Assert(t *testing.T, test, subtest int) {
 
 }
 
-// this test makes sure everything compiles and total call cound it correct
+// this test makes sure everything compiles and total call count is correct
 // if we just have a setup
 type WithSetup struct {
 	parlor.Parlor
@@ -41,8 +41,8 @@ func TestParlorWithSetup(t *testing.T) {
 	p.setup.Assert(t, 0, 2)
 }
 
-// this test makes sure everything compiles and total call cound it correct
-// if we just have a teardown
+// this test makes sure everything compiles and total call count it correct
+// if we just have a tear down
 type WithTearDown struct {
 	parlor.Parlor
 	tearDown CallCounter
@@ -64,7 +64,7 @@ func TestParlorWithTearDown(t *testing.T) {
 }
 
 // this test just makes sure everything compiles if we don't have a setup or a
-// teardown for a subtest but are using parlor
+// tear down for a subtest but are using parlor
 type NoSetupOrTearDown struct {
 	parlor.Parlor
 }
@@ -78,8 +78,8 @@ func TestParlorNoSetupOrTeardown(t *testing.T) {
 	parlor.Run(t, new(NoSetupOrTearDown))
 }
 
-// this is the real test, we will make sure to count every setup and teardown
-// call and as we move throught the lifecycle, we make sure that all calls are
+// this is the real test, we will make sure to count every setup and tear down
+// call and as we move through the life cycle, we make sure that all calls are
 // happening as expected.
 type ParlorTestCallCounts struct {
 	parlor.Parlor
