@@ -9,7 +9,7 @@ Parlor is Blocky's opinionated set of testing tools that augment
 few additional tools that we find useful for testing including:
 
 - testing that a type conforms to a specific interface.
-- setup and teardown for subtests called within a suite.
+- setup and tear down for subtests called within a suite.
 
 ## A quick tour
 
@@ -41,7 +41,7 @@ This package gives us a one liner.
 ### Suites
 
 Currently, testify Suite does not provide an easy mechanism for setup and
-teardown for subtests. There has be some
+teardown for subtests. There has been some
 [discussion](https://github.com/stretchr/testify/issues/1031), however, the
 community decided that the semantics of nested subtests is not general enough
 for the library.
@@ -72,11 +72,11 @@ in parlor).  You can omit any of these function if they are not needed.
     }
 
     func (p *MyTestParlor) TearDownTest() {
-        // my teardown after a test
+        // my tear down after a test
     }
 
     func (p *MyTestParlor) TearDownSubtest() {
-        // my teardown after a subtest
+        // my tear down after a subtest
         // specific to parlor
     }
 
