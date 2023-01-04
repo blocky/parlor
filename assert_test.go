@@ -12,12 +12,14 @@ type Fooer interface {
 	Foo()
 }
 
-type AFooer int
+type AFooer struct{}
 
 func (AFooer) Foo() {}
 
+type NotAFooer struct{}
+
 func TestTypePredicate(t *testing.T) {
-	assert.True(t, parlor.TypePredicate[Fooer](AFooer(0)))
-	assert.False(t, parlor.TypePredicate[Fooer](int(0)))
+	assert.True(t, parlor.TypePredicate[Fooer](AFooer{}))
+	assert.False(t, parlor.TypePredicate[Fooer](NotAFooer{}))
 
 }
