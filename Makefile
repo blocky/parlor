@@ -8,6 +8,3 @@ default: test
 
 test:
 	@$(GOTEST) -v ./... && $(GOTIDY)
-
-mock:
-	cd internal && mockery --all
